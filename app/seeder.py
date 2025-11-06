@@ -25,10 +25,13 @@ while True:
         line = ser.readline().decode(errors='ignore').strip()
     except KeyboardInterrupt:
         break
-    if line.startswith("SEEDER"):
-        response = line[len("SEEDER: "):]
-        print("Received from serial:", response)
-        # TODO: process the gemini request
-        ser.write("SEEDER_REPLY: ACK".encode())
+    if not line.startswith("SEEDER"):
+        continue
+
+    response = line[len("SEEDER: "):]
+    print("Received from serial:", response)
+    # TODO: process the gemini request
+    ser.write("SEEDER_REPLY: ACK".encode())
+    line = None
 
 ser.close()

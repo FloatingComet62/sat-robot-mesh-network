@@ -54,7 +54,7 @@ def service_connection(key, mask):
             return
 
         data.db += recv_data
-    if (mask & selectors.EVENT_WRITE) and data.db:
+    elif (mask & selectors.EVENT_WRITE) and data.db:
         decoded_data = data.db.decode().strip()
         print("Received from socket:", decoded_data)
         ser.write(("LEACHER_REQUEST: " + decoded_data).encode())
@@ -67,10 +67,11 @@ def service_connection(key, mask):
                 response = response[len("LEACHER: "):]
                 break
             response = None
+
         print("Received from serial:", response)
         data.db = b''
         data.outb = response.encode()
-    if (mask & selectors.EVENT_WRITE) and data.outb:
+    elif (mask & selectors.EVENT_WRITE) and data.outb:
         sent = sock.send(data.outb)
         data.outb = data.outb[sent:]
 
@@ -80,8 +81,8 @@ try:
         for key, mask in events:
             if key.data is None:
                 accept_wrapper(key.fileobj)
-            else:
-                service_connection(key, mask)
+                continue
+            service_connection(key, mask)
 except KeyboardInterrupt:
     print("Exiting....")
 finally:
