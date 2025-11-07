@@ -16,22 +16,14 @@ time.sleep(2)
 
 print("Connected to", PORT)
 
-msg = "SEEDER"
-ser.write(msg.encode())
-print("Sent:", msg.strip())
-
 while True:
     try:
         line = ser.readline().decode(errors='ignore').strip()
     except KeyboardInterrupt:
         break
-    if not line.startswith("SEEDER"):
-        continue
 
-    response = line[len("SEEDER: "):]
-    print("Received from serial:", response)
-    # TODO: process the gemini request
-    ser.write("SEEDER_REPLY: ACK".encode())
-    line = None
+    if line:
+        print("> ", line)
+        line = None
 
 ser.close()

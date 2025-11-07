@@ -13,18 +13,12 @@ painlessMesh  mesh;
 // leacher -> device which will indirectly connect to seeder to get internet access, if it can't connect to internet
 
 int INTERMEDIATE = 0;
-int SEEDER = 1;
 int LEACHER = 2;
-// 0 -> intermediate mode
-// 1 -> connected to seeder
-// 2 -> listener for leacher
+
 int label = INTERMEDIATE;
 
 void receivedCallback(uint32_t from, String &msg) {
   Serial.printf("Received from %u msg=%s\n", from, msg.c_str());
-  if (label == SEEDER) {
-    Serial.printf("SEEDER: %s\n", msg.c_str());
-  }
   if (label == LEACHER) {
     Serial.printf("LEACHER: %s\n", msg.c_str());
   }
@@ -55,7 +49,6 @@ void setup() {
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
 }
 
-String activateSeeder = "SEEDER";
 String activateLeacher = "LEACHER";
 String activateIntermediate = "INTERMEDIATE";
 
@@ -63,26 +56,16 @@ void loop() {
   mesh.update();
   if (!Serial.available()) return;
   String msg = Serial.readStringUntil('\n');
-  if (msg == activateSeeder) {
-    label = SEEDER;
-    Serial.println("Activated as Seeder");
-  } else if (msg == activateLeacher) {
+  if (msg == activateLeacher) {
     label = LEACHER;
     Serial.println("Activated as Leacher");
   } else if (msg == activateIntermediate) {
     label = INTERMEDIATE;
     Serial.println("Activated as Intermediate");
-  } else if (label == SEEDER && msg.startsWith("SEEDER_REPLY: ")) {
-    String reply = msg.substring(14);
-    Serial.printf("_SEEDER TO LEACHER: %s\n", reply.c_str());
-    bool done = mesh.sendBroadcast(reply);
-    Serial.printf("Broadcasting reply %s result: %d\n", reply.c_str(), done);
   } else if (label == LEACHER && msg.startsWith("LEACHER_REQUEST: "))  {
     String request = msg.substring(17);
     Serial.printf("_LEACHER TO SEEDER: %s\n", request.c_str());
     bool done = mesh.sendBroadcast(request);
     Serial.printf("Broadcasting request %s result: %d\n", request.c_str(), done);
-    // String test = "ACK";
-    // receivedCallback(69, test);
   }
 }
