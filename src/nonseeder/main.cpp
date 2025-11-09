@@ -64,7 +64,6 @@ void loop() {
     Serial.println("Activated as Intermediate");
   } else if (label == LEACHER && msg.startsWith("LEACHER_REQUEST: "))  {
     String request = msg.substring(17);
-    Serial.printf("_LEACHER TO SEEDER: %s\n", request.c_str());
     bool done = mesh.sendBroadcast(request);
     Serial.printf("Broadcasting request %s result: %d\n", request.c_str(), done);
   }

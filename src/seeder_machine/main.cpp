@@ -25,6 +25,25 @@ void setup() {
 }
 
 static int connected = 0;
+static String msg;
+
+void runRequest() {
+  if (!connected) return;
+
+  // update this to return gemini response, or whatever the
+  // LLM team is doing
+
+  HTTPClient http;
+  http.begin("http://example.com/api/data");
+  http.addHeader("Content-Type", "application/json");
+  int code = http.POST("{\"mesh_msg\":\"" + msg + "\"}");
+  Serial2.printf("ACK: %d\n", code);
+  http.end();
+
+
+  msg = "";
+}
+
 void loop() {
   // indicate connection state
   static unsigned long last = 0;
@@ -40,17 +59,8 @@ void loop() {
 
   digitalWrite(LED_BUILTIN, connected ? HIGH : LOW);
 
-  Serial.print(".");
-  if (Serial2.available()) {
-    Serial.println("Got shit");
-    String msg = Serial2.readStringUntil('\n');
-    if (connected) {
-      HTTPClient http;
-      http.begin("http://example.com/api/data");
-      http.addHeader("Content-Type", "application/json");
-      int code = http.POST("{\"mesh_msg\":\"" + msg + "\"}");
-      Serial2.printf("ACK: %d\n", code);
-      http.end();
-    }
-  }
+  if (msg.length() > 0) runRequest();
+  if (!Serial2.available()) return;
+  msg = Serial2.readStringUntil('\n');
+  runRequest();
 }
